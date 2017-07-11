@@ -29,6 +29,7 @@ public class FlowdockNotifier extends Notifier {
     private final String flowToken;
     private final String notificationTags;
     private final boolean chatNotification;
+    private final boolean chatStatus;
 
     private final Map<BuildResult, Boolean> notifyMap;
     private final boolean notifySuccess;
@@ -41,11 +42,12 @@ public class FlowdockNotifier extends Notifier {
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public FlowdockNotifier(String flowToken, String notificationTags, String chatNotification,
-        String notifySuccess, String notifyFailure, String notifyFixed, String notifyUnstable,
-        String notifyAborted, String notifyNotBuilt) {
+        String chatStatus, String notifySuccess, String notifyFailure, String notifyFixed,
+        String notifyUnstable, String notifyAborted, String notifyNotBuilt) {
         this.flowToken = flowToken;
         this.notificationTags = notificationTags;
         this.chatNotification = chatNotification != null && chatNotification.equals("true");
+        this.chatStatus = chatStatus != null && chatStatus.equals("true");
 
         this.notifySuccess = notifySuccess != null && notifySuccess.equals("true");
         this.notifyFailure = notifyFailure != null && notifyFailure.equals("true");
@@ -74,6 +76,10 @@ public class FlowdockNotifier extends Notifier {
 
     public boolean getChatNotification() {
         return chatNotification;
+    }
+
+    public boolean getChatStatus() {
+        return chatStatus;
     }
 
     public boolean getNotifySuccess() {
@@ -129,12 +135,19 @@ public class FlowdockNotifier extends Notifier {
             api.pushTeamInboxMessage(msg);
             listener.getLogger().println("Flowdock: Team Inbox notification sent successfully");
 
-            if((build.getResult() != Result.SUCCESS || buildResult == BuildResult.FIXED) && chatNotification) {
+            if(shouldNotify(buildResult) && chatStatus) {
                 ChatMessage chatMsg = ChatMessage.fromBuild(build, buildResult, listener);
                 chatMsg.setTags(vars.expand(notificationTags));
                 api.pushChatMessage(chatMsg);
                 logger.println("Flowdock: Chat notification sent successfully");
             }
+            else if((build.getResult() != Result.SUCCESS || buildResult == BuildResult.FIXED) && chatNotification) {
+                ChatMessage chatMsg = ChatMessage.fromBuild(build, buildResult, listener);
+                chatMsg.setTags(vars.expand(notificationTags));
+                api.pushChatMessage(chatMsg);
+                logger.println("Flowdock: Chat notification sent successfully");
+            }
+
         }
 
         catch(IOException ex) {
