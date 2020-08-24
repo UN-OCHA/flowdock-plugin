@@ -93,8 +93,11 @@ public class TeamInboxMessage extends FlowdockMessage {
         String buildLink = (rootUrl == null) ? null : rootUrl + build.getUrl();
         if(buildLink != null) msg.setLink(buildLink);
 
-        if(build.getResult().isWorseThan(Result.SUCCESS))
-            msg.setFromAddress(FLOWDOCK_BUILD_FAIL_EMAIL);
+        Result currResult = build.getResult();
+        if (currResult != null) {
+          if (currResult.isWorseThan(Result.SUCCESS))
+              msg.setFromAddress(FLOWDOCK_BUILD_FAIL_EMAIL);
+        }
 
         StringBuilder content = new StringBuilder();
         content.append("<h3>").append(projectName).append("</h3>");

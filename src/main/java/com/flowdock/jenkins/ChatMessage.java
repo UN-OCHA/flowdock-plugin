@@ -22,7 +22,7 @@ public class ChatMessage extends FlowdockMessage {
     public String asPostData() throws UnsupportedEncodingException {
         StringBuilder postData = new StringBuilder();
         postData.append("content=").append(urlEncode(content));
-        if (thread != null && thread != "") {
+        if (thread != null && thread.equals("")) {
 		        postData.append("&thread_id").append(urlEncode(thread));
 		    }
         postData.append("&external_user_name=").append(urlEncode(externalUserName));
