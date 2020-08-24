@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
   This plugin posts build notifications to your flow at <a href="https://www.flowdock.com/" target="_blank">Flowdock</a>.
 </div>
