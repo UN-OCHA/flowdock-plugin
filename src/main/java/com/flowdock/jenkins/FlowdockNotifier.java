@@ -27,7 +27,9 @@ public class FlowdockNotifier extends Notifier {
 
 
     private final String flowToken;
+    private final String flowThread;
     private final String notificationTags;
+    private final boolean chatStart;
     private final boolean chatNotification;
     private final boolean chatStatus;
 
@@ -41,11 +43,14 @@ public class FlowdockNotifier extends Notifier {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public FlowdockNotifier(String flowToken, String notificationTags, String chatNotification,
+    public FlowdockNotifier(String flowToken, String flowThread, String notificationTags,
+        String chatStart, String chatNotification,
         String chatStatus, String notifySuccess, String notifyFailure, String notifyFixed,
         String notifyUnstable, String notifyAborted, String notifyNotBuilt) {
         this.flowToken = flowToken;
+        this.flowThread = flowThread;
         this.notificationTags = notificationTags;
+        this.chatStart = chatStart != null && chatStart.equals("true");
         this.chatNotification = chatNotification != null && chatNotification.equals("true");
         this.chatStatus = chatStatus != null && chatStatus.equals("true");
 
@@ -68,6 +73,10 @@ public class FlowdockNotifier extends Notifier {
 
     public String getFlowToken() {
         return flowToken;
+    }
+
+    public String getFlowThread() {
+        return flowThread;
     }
 
     public String getNotificationTags() {
@@ -131,18 +140,21 @@ public class FlowdockNotifier extends Notifier {
             FlowdockAPI api = new FlowdockAPI(getDescriptor().apiUrl(), flowToken);
             TeamInboxMessage msg = TeamInboxMessage.fromBuild(build, buildResult, listener);
             EnvVars vars = build.getEnvironment(listener);
+            msg.setThread(flowThread);
             msg.setTags(vars.expand(notificationTags));
             api.pushTeamInboxMessage(msg);
             listener.getLogger().println("Flowdock: Team Inbox notification sent successfully");
 
             if(shouldNotify(buildResult) && chatStatus) {
                 ChatMessage chatMsg = ChatMessage.fromBuild(build, buildResult, listener);
+                chatMsg.setThread(flowThread);
                 chatMsg.setTags(vars.expand(notificationTags));
                 api.pushChatMessage(chatMsg);
                 logger.println("Flowdock: Chat notification sent successfully");
             }
             else if((build.getResult() != Result.SUCCESS || buildResult == BuildResult.FIXED) && chatNotification) {
                 ChatMessage chatMsg = ChatMessage.fromBuild(build, buildResult, listener);
+                chatMsg.setThread(flowThread);
                 chatMsg.setTags(vars.expand(notificationTags));
                 api.pushChatMessage(chatMsg);
                 logger.println("Flowdock: Chat notification sent successfully");
@@ -187,10 +199,12 @@ public class FlowdockNotifier extends Notifier {
         }
 
         public FormValidation doTestConnection(@QueryParameter("flowToken") final String flowToken,
+            @QueryParameter("flowThread") final String flowThread,
             @QueryParameter("notificationTags") final String notificationTags) {
             try {
                 FlowdockAPI api = new FlowdockAPI(apiUrl(), flowToken);
                 ChatMessage testMsg = new ChatMessage();
+                testMsg.setThread(flowThread);
                 testMsg.setTags(notificationTags);
                 testMsg.setContent("Your plugin is ready!");
                 api.pushChatMessage(testMsg);

@@ -4,9 +4,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public abstract class FlowdockMessage {
+    protected String thread;
     protected String content;
     protected String tags;
 
+		public void setThread(String thread) {
+				this.thread = thread;
+		}
+    
     public void setContent(String content) {
         this.content = content;
     }
