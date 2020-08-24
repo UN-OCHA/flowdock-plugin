@@ -7,7 +7,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.BuildWrapper;
+import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BuildStart extends BuildWrapper {
+
+    private String apiUrl = "https://api.flowdock.com";
 
     private final String flowToken;
     private final String flowThread;
@@ -36,18 +38,24 @@ public class BuildStart extends BuildWrapper {
     }
 
     public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) {
+        PrintStream logger = listener.getLogger();
 
-      if (!this.chatStart)
-        return;
+        if (this.chatStart) {
 
-      PrintStream logger = listener.getLogger();
+            try {
+                FlowdockAPI api = new FlowdockAPI(apiUrl, flowToken);
+                EnvVars vars = build.getEnvironment(listener);
+                ChatMessage chatMsg = ChatMessage.startBuild(build, launcher, listener);
+                chatMsg.setTags(vars.expand(notificationTags));
+                api.pushChatMessage(chatMsg);
+                logger.println("Flowdock: Chat notification sent successfully");
+            }
+            catch(Exception e) {
+                logger.println("Flowdock: failed to send start build message");
+                logger.println("Flowdock: " + e.getMessage());
+            }
+        }
 
-      try {
-        FlowdockAPI api = new FlowdockAPI(getDescriptor().apiUrl(), flowToken);
-        ChatMessage chatMsg = ChatMessage.startBuild(build, buildResult, listener);
-        chatMsg.setTags(vars.expand(notificationTags));
-        api.pushChatMessage(chatMsg);
-        logger.println("Flowdock: Chat notification sent successfully");
-      }
+        return new Environment() {};
     }
 }

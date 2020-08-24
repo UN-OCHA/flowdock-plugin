@@ -3,6 +3,7 @@ package com.flowdock.jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
+import hudson.Launcher;
 import hudson.model.Result;
 
 import java.io.UnsupportedEncodingException;
@@ -77,7 +78,7 @@ public class ChatMessage extends FlowdockMessage {
     }
 
 
-    public static ChatMessage startBuild(AbstractBuild build, BuildResult buildResult, BuildListener listener) {
+    public static ChatMessage startBuild(AbstractBuild build, Launcher launcher, BuildListener listener) {
         ChatMessage msg = new ChatMessage();
         StringBuilder content = new StringBuilder();
 
