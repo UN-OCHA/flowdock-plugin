@@ -21,10 +21,6 @@
          title="Test connection with Chat notification" progress="Sending..."
          method="testConnection" with="flowToken,notificationTags" />
 
-      <f:entry title="Chat notification when build starts" field="chatStart">
-        <f:checkbox />
-      </f:entry>
-
       <f:entry title="Chat notification when build fails" field="chatNotification">
         <f:checkbox />
       </f:entry>

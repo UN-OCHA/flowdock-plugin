@@ -25,11 +25,9 @@ import java.util.Map;
 
 public class FlowdockNotifier extends Notifier {
 
-
     private final String flowToken;
     private final String flowThread;
     private final String notificationTags;
-    private final boolean chatStart;
     private final boolean chatNotification;
     private final boolean chatStatus;
 
@@ -44,13 +42,12 @@ public class FlowdockNotifier extends Notifier {
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public FlowdockNotifier(String flowToken, String flowThread, String notificationTags,
-        String chatStart, String chatNotification,
+        String chatNotification,
         String chatStatus, String notifySuccess, String notifyFailure, String notifyFixed,
         String notifyUnstable, String notifyAborted, String notifyNotBuilt) {
         this.flowToken = flowToken;
         this.flowThread = flowThread;
         this.notificationTags = notificationTags;
-        this.chatStart = chatStart != null && chatStart.equals("true");
         this.chatNotification = chatNotification != null && chatNotification.equals("true");
         this.chatStatus = chatStatus != null && chatStatus.equals("true");
 
