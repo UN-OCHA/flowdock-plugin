@@ -6,6 +6,7 @@ import java.io.IOException;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.EnvVars;
+import hudson.Launcher;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.scm.ChangeLogSet;
@@ -129,6 +130,45 @@ public class TeamInboxMessage extends FlowdockMessage {
                 content.append("</span></li>");
             }
             content.append("</ul></div>");
+        }
+
+        msg.setContent(content.toString());
+
+        return msg;
+    }
+
+    public static TeamInboxMessage startBuild(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+        TeamInboxMessage msg = new TeamInboxMessage();
+
+        String projectName = "";
+        String configuration = "";
+        if(build.getProject().getRootProject() != build.getProject()) {
+            projectName = build.getProject().getRootProject().getDisplayName();
+            configuration = " on " + build.getProject().getDisplayName();
+        } else {
+            projectName = build.getProject().getDisplayName();
+        }
+
+        msg.setProject(projectName.replaceAll("[^a-zA-Z0-9\\-_ ]", ""));
+        String buildNo = build.getDisplayName().replaceAll("#", "");
+        msg.setSubject(projectName + " build " + buildNo + configuration + " is starting");
+
+        String rootUrl = Hudson.getInstance().getRootUrl();
+        String buildLink = (rootUrl == null) ? null : rootUrl + build.getUrl();
+        if(buildLink != null) msg.setLink(buildLink);
+
+        StringBuilder content = new StringBuilder();
+        content.append("<h3>").append(projectName).append("</h3>");
+        content.append("Build: ").append(build.getDisplayName()).append("<br />");
+        if(buildLink != null)
+            content.append("URL: <a href=\"").append(buildLink).append("\">").append(build.getFullDisplayName()).append("</a>").append("<br />");
+
+        EnvVars envVars = build.getEnvironment(listener);
+        String vcsInfo = versionControlVariableList(envVars);
+        if(vcsInfo.length() > 0) {
+            content.append("<br /><strong>Version control:</strong><br />");
+            content.append(vcsInfo);
+            content.append("<br/>");
         }
 
         msg.setContent(content.toString());

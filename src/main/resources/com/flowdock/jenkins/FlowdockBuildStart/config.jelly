@@ -1,12 +1,16 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
-    <f:entry title="Flow API token(s)" field="flowToken">
+    <f:entry title="${%Flow API token(s)}" field="flowToken">
         <f:textbox />
     </f:entry>
 
-    <f:entry title="Notification tags" field="notificationTags">
+    <f:entry title="${%Notification tags}" field="notificationTags">
         <f:textbox />
+    </f:entry>
+
+    <f:entry title="${%Send as chat message}">
+        <f:checkbox field="chatMessage" default="false"/>
     </f:entry>
 
 </j:jelly>
