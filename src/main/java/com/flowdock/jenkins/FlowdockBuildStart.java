@@ -1,5 +1,7 @@
 package com.flowdock.jenkins;
 
+import static org.apache.commons.lang.BooleanUtils.toBooleanDefaultIfNull;
+
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -31,11 +33,13 @@ public final class FlowdockBuildStart extends BuildWrapper {
 
     private final String flowToken;
     private final String notificationTags;
+    private final Boolean chatMessage;
 
     @DataBoundConstructor
-    public FlowdockBuildStart(String flowToken, String notificationTags) {
+    public FlowdockBuildStart(String flowToken, String notificationTags, Boolean chatMessage) {
         this.flowToken = flowToken;
         this.notificationTags = notificationTags;
+        this.chatMessage = toBooleanDefaultIfNull(chatMessage, false);
     }
 
     @Override
@@ -44,15 +48,27 @@ public final class FlowdockBuildStart extends BuildWrapper {
         try {
             FlowdockAPI api = new FlowdockAPI(this.apiUrl, this.flowToken);
             EnvVars vars = build.getEnvironment(listener);
-            ChatMessage chatMsg = ChatMessage.startBuild(build, launcher, listener);
-            chatMsg.setTags(vars.expand(this.notificationTags));
-            api.pushChatMessage(chatMsg);
+            if (this.chatMessage) {
+                ChatMessage chatMsg = ChatMessage.startBuild(build, launcher, listener);
+                chatMsg.setTags(vars.expand(this.notificationTags));
+                api.pushChatMessage(chatMsg);
+                listener.getLogger().println("Flowdock: Chat notification sent successfully");
+            } else {
+                TeamInboxMessage msg = TeamInboxMessage.startBuild(build, launcher, listener);
+                msg.setTags(vars.expand(this.notificationTags));
+                api.pushTeamInboxMessage(msg);
+                listener.getLogger().println("Flowdock: Team Inbox notification sent successfully");
+            }
         }
         catch(Exception e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
 
         return new Environment() {};
+    }
+
+    public boolean getChatMessage() {
+        return chatMessage;
     }
 
     public String getFlowToken() {
