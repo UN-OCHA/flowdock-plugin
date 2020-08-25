@@ -21,8 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jenkins.YesNoMaybe;
-// import jenkins.tasks.SimpleBuildWrapper0;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public final class FlowdockBuildStart extends BuildWrapper {
