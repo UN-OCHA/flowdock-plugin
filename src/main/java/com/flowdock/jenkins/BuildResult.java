@@ -18,21 +18,29 @@ public enum BuildResult {
     }
 
     public static BuildResult fromBuild(AbstractBuild build) {
-        if (build.getResult().equals(Result.SUCCESS)) {
-            Result prevResult = build.getPreviousBuild() != null ? build.getPreviousBuild().getResult() : null;
-            if (Result.FAILURE.equals(prevResult) || Result.UNSTABLE.equals(prevResult)) {
+        Result currResult = build.getResult();
+        if (currResult == null) {
+          return FAILURE;
+        }
+
+        if (currResult.equals(Result.SUCCESS)) {
+            AbstractBuild prevBuild = build.getPreviousBuild();
+            if (prevBuild == null) {
+              return SUCCESS;
+            }
+            Result prevResult = prevBuild.getResult();
+            if (prevResult == null || Result.FAILURE.equals(prevResult) || Result.UNSTABLE.equals(prevResult)) {
                 return FIXED;
             }
             return SUCCESS;
-        } else if (build.getResult().equals(Result.UNSTABLE)) {
+        } else if (currResult.equals(Result.UNSTABLE)) {
             return UNSTABLE;
-        } else if (build.getResult().equals(Result.ABORTED)) {
+        } else if (currResult.equals(Result.ABORTED)) {
             return ABORTED;
-        } else if (build.getResult().equals(Result.NOT_BUILT)) {
+        } else if (currResult.equals(Result.NOT_BUILT)) {
             return NOT_BUILT;
-        } else {
-            return FAILURE;
         }
+        return FAILURE;
     }
 
     public String getHumanResult() {

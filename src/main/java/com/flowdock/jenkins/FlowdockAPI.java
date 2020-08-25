@@ -19,6 +19,8 @@ import java.net.SocketAddress;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import java.nio.charset.Charset;
+
 import jenkins.model.Jenkins;
 
 import org.apache.commons.lang.StringUtils;
@@ -61,7 +63,7 @@ public class FlowdockAPI {
             connection = (HttpURLConnection)url.openConnection(getProxy());
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("Content-Length", String.valueOf(data.getBytes().length));
+            connection.setRequestProperty("Content-Length", String.valueOf(data.getBytes(Charset.defaultCharset()).length));
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -75,7 +77,7 @@ public class FlowdockAPI {
             if(connection.getResponseCode() != 200) {
                 StringBuffer responseContent = new StringBuffer();
                 try {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), Charset.defaultCharset()));
                     String responseLine;
                     while ((responseLine = in.readLine()) != null) {
                         responseContent.append(responseLine);

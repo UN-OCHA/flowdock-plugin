@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <tr>
@@ -5,6 +6,10 @@
     <table width="100%">
 
       <f:entry title="Flow API token(s)" field="flowToken">
+        <f:textbox />
+      </f:entry>
+
+      <f:entry title="Thread ID" field="flowThread">
         <f:textbox />
       </f:entry>
 
@@ -17,6 +22,10 @@
          method="testConnection" with="flowToken,notificationTags" />
 
       <f:entry title="Chat notification when build fails" field="chatNotification">
+        <f:checkbox />
+      </f:entry>
+
+      <f:entry title="Chat notification for all selected build statuses" field="chatStatus">
         <f:checkbox />
       </f:entry>
 
@@ -39,6 +48,7 @@
         <f:entry title="Not built" field="notifyNotBuilt">
           <f:checkbox value="true" />
         </f:entry>
+
       </f:section>
 
     </table>
